@@ -13,7 +13,6 @@ public class FTCTeleOp2026 extends OpMode{
     //all the hardware and initialization
     FTChardware hw = new FTChardware();
 
-
     // Edge detection for button presses
     private boolean lastAPressed = false;
     private boolean lastBPressed = false;
@@ -60,6 +59,7 @@ public class FTCTeleOp2026 extends OpMode{
         hw.odo.update();
         driveControls();
         armControl();
+        dpadSetSpeed();
         geckoControl();
         intakeControl();
         ballPusherControl();
@@ -156,8 +156,17 @@ public class FTCTeleOp2026 extends OpMode{
         telemetry.addData("Arm Target", hw.revolverMotor.getTargetPosition());
     }
 
+    public double added = 0;
+    private void dpadSetSpeed() {
+        if (gamepad1.dpad_up) {
+            added = added + 0.75;
+        }
+        if (gamepad1.dpad_down) {
+            added = added - 0.75;
+        }
+    }
     private void geckoControl() {
-        double power = 5.0 * gamepad1.left_trigger;
+        double power = (8.0 + added) * gamepad1.left_trigger;
         hw.lGecko.setPower(power);
         hw.rGecko.setPower(power);
     }
