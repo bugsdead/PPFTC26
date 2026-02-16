@@ -67,7 +67,7 @@ public class FTCTeleOp2026 extends OpMode{
         Pose2D pos = hw.odo.getPosition();
         telemetry.addData("Robot X", hw.odo.getPosX(DistanceUnit.MM));
         telemetry.addData("Robot Y", hw.odo.getPosY(DistanceUnit.MM));
-        telemetry.addData("Robot heading", pos.getHeading(AngleUnit.RADIANS));
+        telemetry.addData("Robot heading", pos.getHeading(AngleUnit.DEGREES));
         telemetry.update();
     }
 
