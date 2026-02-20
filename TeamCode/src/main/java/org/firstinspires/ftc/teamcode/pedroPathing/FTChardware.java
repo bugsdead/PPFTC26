@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -29,8 +30,10 @@ public class FTChardware {
     public DcMotor rGecko;
 
     public Servo ballPusher;
-    public CRServo lIntake;
     public CRServo rIntake;
+
+    private VoltageSensor voltageSensor;
+    private static final double NOMINAL_VOLTAGE = 12.0;
 
 
     public void init(HardwareMap hwMap) {
@@ -50,8 +53,10 @@ public class FTChardware {
 
         //Servos
         ballPusher = hwMap.get(Servo.class, "ballPusher");
-        lIntake = hwMap.get(CRServo.class, "lIntake");
         rIntake = hwMap.get(CRServo.class, "rIntake");
+        rIntake.setPower(0);
+
+        voltageSensor = hwMap.voltageSensor.iterator().next();
 
         //Odometry computer configuration
         odo.setOffsets(-84.0, -168.0, DistanceUnit.MM);
@@ -103,6 +108,16 @@ public class FTChardware {
         revolverMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lGecko.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rGecko.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    public double getVoltageCompensation() {
+        return NOMINAL_VOLTAGE / voltageSensor.getVoltage();
+    }
+
+    public void setGeckoPower(double power) {
+        double comp = getVoltageCompensation();
+        lGecko.setPower(power * comp);
+        rGecko.setPower(power * comp);
     }
 
     // Optional: stop all motors

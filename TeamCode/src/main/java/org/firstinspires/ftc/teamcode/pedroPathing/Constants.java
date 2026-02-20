@@ -18,9 +18,9 @@ public class Constants {
     // TODO: Run the Tuning OpMode to get accurate values for all fields below
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(10.16047) // TODO: Set your robot's mass in kg
+            .mass(10.34191) // TODO: Set your robot's mass in kg
             .forwardZeroPowerAcceleration(-44.590512431880974)   // TODO: Run Forward Zero Power Acceleration Tuner
-            .lateralZeroPowerAcceleration(-52.34671770504159)    // TODO: Run Lateral Zero Power Acceleration Tuner
+            .lateralZeroPowerAcceleration(-59.00612882892924)    // TODO: Run Lateral Zero Power Acceleration Tuner
             .translationalPIDFCoefficients(new PIDFCoefficients(0.03, 0, 0.01, 0.015))
             .translationalPIDFSwitch(4)
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.4, 0, 0.005, 0.0006))
@@ -41,7 +41,7 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .xVelocity(61.87568820743111)  // TODO: Run Forward Velocity Tuner
-            .yVelocity(50.791173259104326); // TODO: Run Lateral Velocity Tuner
+            .yVelocity(51.75352466012548); // TODO: Run Lateral Velocity Tuner
 
     // Pinpoint odometry offsets: -84.0mm = -3.307in, -168.0mm = -6.614in
     public static PinpointConstants localizerConstants = new PinpointConstants()
@@ -53,7 +53,7 @@ public class Constants {
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
     public static PathConstraints pathConstraints = new PathConstraints(
-            0.995, 0.1, 0.1, 0.009, 50, 1.25, 10, 1
+            0.995, 0.1, 0.1, 0.009, 100, 3.5, 10, 5.0
     );
 
     public static Follower createFollower(HardwareMap hardwareMap) {
