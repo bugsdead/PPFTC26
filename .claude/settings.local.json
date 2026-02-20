@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /c/Users/Isabella/forkedPPFTC26 log --oneline -10)",
+      "Bash(git status:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}

@@ -18,6 +18,7 @@ public class FTCAutonomous2026 extends OpMode {
     FTChardware hw = new FTChardware();
 
     private static final Pose SCORE_POS = new Pose(23.18, 30.76);
+    private static final Pose PUSH_START = new Pose(0.88, 34.01);
 
     private PathChain pathToDeposit;
     private PathChain pathPush;
@@ -29,8 +30,6 @@ public class FTCAutonomous2026 extends OpMode {
     private PathChain pathIntake2;
     private PathChain pathToScore3;
 
-    private static final double INTAKE_BAND_OFFSET = 0.0;
-
     // Revolver constants
     private static final double TICKS_PER_REV = 448.1;
     private static final double TICKS_PER_DEGREE = TICKS_PER_REV / 360.0;
@@ -39,8 +38,8 @@ public class FTCAutonomous2026 extends OpMode {
 
     // Gecko/spit constants
     private static final double GECKO_POWER_1 = 0.49;
-    private static final double GECKO_POWER_2 = 0.43;
-    private static final double GECKO_POWER_3 = 0.41;
+    private static final double GECKO_POWER_2 = 0.42;
+    private static final double GECKO_POWER_3 = 0.45;
 
     private enum AutoState {
         DRIVE_TO_DEPOSIT,
@@ -57,6 +56,8 @@ public class FTCAutonomous2026 extends OpMode {
         DRIVE_TO_PICKUP_2,
         INTAKE_2,
         DRIVE_TO_SCORE_3,
+
+
         WAIT_3,
         DONE
     }
@@ -85,61 +86,11 @@ public class FTCAutonomous2026 extends OpMode {
                 .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(231))
                 .build();
 
-        // Push samples
-//        pathPush = follower.pathBuilder()
-//                .addPath(new BezierLine(SCORE_POS, new Pose(87.53, -17.08)))
-//                .setLinearHeadingInterpolation(Math.toRadians(101), Math.toRadians(180))
-//                .addPath(new BezierLine(new Pose(87.53, -17.08), new Pose(33.38, -15.10)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-//                .addPath(new BezierLine(new Pose(33.38, -15.10), new Pose(85.56, 11.38)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-//                .build();
-//
-//        // Score 1
-//        pathToScore1 = follower.pathBuilder()
-//                .addPath(new BezierLine(new Pose(85.56, 11.38), SCORE_POS))
-//                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(101))
-//                .build();
-//
-//        // Pickup 1
-//        pathToPickup1 = follower.pathBuilder()
-//                .addPath(new BezierLine(SCORE_POS, new Pose(83.97, 22.84)))
-//                .setLinearHeadingInterpolation(Math.toRadians(101), Math.toRadians(180))
-//                .build();
-//
-//        // Intake 1
-//        pathIntake1 = follower.pathBuilder()
-//                .addPath(new BezierLine(new Pose(83.97, 22.84), new Pose(34.17, 19.29)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-//                .addPath(new BezierLine(new Pose(34.17, 19.29), new Pose(26.66, 35.10)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-//                .addPath(new BezierLine(new Pose(26.66, 35.10), new Pose(59.86, 20.47)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-//                .build();
-//
-//        // Score 2
-//        pathToScore2 = follower.pathBuilder()
-//                .addPath(new BezierLine(new Pose(59.86, 20.47), SCORE_POS))
-//                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(101))
-//                .build();
-//
-//        // Pickup 2
-//        pathToPickup2 = follower.pathBuilder()
-//                .addPath(new BezierLine(SCORE_POS, new Pose(71.72, 56.05)))
-//                .setLinearHeadingInterpolation(Math.toRadians(101), Math.toRadians(180))
-//                .build();
-//
-//        // Intake 2
-//        pathIntake2 = follower.pathBuilder()
-//                .addPath(new BezierLine(new Pose(71.72, 56.05), new Pose(34.56, 55.65)))
-//                .setConstantHeadingInterpolation(Math.toRadians(180))
-//                .build();
-//
-//        // Score 3
-//        pathToScore3 = follower.pathBuilder()
-//                .addPath(new BezierLine(new Pose(34.56, 55.65), SCORE_POS))
-//                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(101))
-//                .build();
+        // Score -> push start (22.3" X, 3.25" Y, heading 231° -> 180°)
+        pathPush = follower.pathBuilder()
+                .addPath(new BezierLine(SCORE_POS, PUSH_START))
+                .setLinearHeadingInterpolation(Math.toRadians(231), Math.toRadians(180))
+                .build();
 
         hw.rIntake.setPower(0);
         hw.ballPusher.setPosition(0.5);
@@ -173,6 +124,7 @@ public class FTCAutonomous2026 extends OpMode {
     @Override
     public void start() {
         follower.followPath(pathToDeposit);
+        hw.setGeckoPower(GECKO_POWER_1);
         state = AutoState.DRIVE_TO_DEPOSIT;
     }
 
@@ -183,10 +135,10 @@ public class FTCAutonomous2026 extends OpMode {
         switch (state) {
             case DRIVE_TO_DEPOSIT:
                 if (!follower.isBusy()) {
-                    hw.setGeckoPower(GECKO_POWER_1);
+                    hw.ballPusher.setPosition(0.0);
                     pushTimer = getRuntime();
                     spitStep = 0;
-                    state = AutoState.GECKO_STARTUP;
+                    state = AutoState.SPIT_PUSH;
                 }
                 break;
 
@@ -199,7 +151,8 @@ public class FTCAutonomous2026 extends OpMode {
                 break;
 
             case SPIT_PUSH:
-                if (getRuntime() - pushTimer >= 1.0) {
+                double pushDuration = (spitStep == 0) ? 0.5 : 0.4;
+                if (getRuntime() - pushTimer >= pushDuration) {
                     hw.ballPusher.setPosition(0.5);
                     spitStep++;
                     if (spitStep < 3) {
@@ -207,7 +160,8 @@ public class FTCAutonomous2026 extends OpMode {
                         state = AutoState.SPIT_SELECT;
                     } else {
                         hw.setGeckoPower(0);
-                        state = AutoState.DONE;
+                        pushTimer = getRuntime();
+                        state = AutoState.DRIVE_PUSH;
                     }
                 }
                 break;
@@ -223,9 +177,11 @@ public class FTCAutonomous2026 extends OpMode {
                 break;
 
             case DRIVE_PUSH:
-                if (!follower.isBusy()) {
-                    follower.followPath(pathToScore1);
-                    state = AutoState.DRIVE_TO_SCORE_1;
+                if (pushTimer > 0 && getRuntime() - pushTimer >= 0.4) {
+                    follower.followPath(pathPush);
+                    pushTimer = -1;
+                } else if (pushTimer <= 0 && !follower.isBusy()) {
+                    state = AutoState.DONE;
                 }
                 break;
 
@@ -256,15 +212,15 @@ public class FTCAutonomous2026 extends OpMode {
             case INTAKE_1: {
                 double elapsed = getRuntime() - intakeStartTime;
                 if (revolverStep == 0) {
-                    revolverRotate(30);
+                    revolverRotate(120);
                     revolverStep = 1;
-                } else if (revolverStep == 1 && elapsed >= BALL_INTAKE_TIME) {
-                    revolverRotate(60);
+                } else if (revolverStep == 1 && elapsed >= BALL_INTAKE_TIME && !hw.revolverMotor.isBusy()) {
+                    revolverRotate(120);
                     revolverStep = 2;
-                } else if (revolverStep == 2 && elapsed >= 2 * BALL_INTAKE_TIME) {
-                    revolverRotate(60);
+                } else if (revolverStep == 2 && elapsed >= 2 * BALL_INTAKE_TIME && !hw.revolverMotor.isBusy()) {
+                    revolverRotate(120);
                     revolverStep = 3;
-                } else if (revolverStep == 3 && elapsed >= 3 * BALL_INTAKE_TIME) {
+                } else if (revolverStep == 3 && elapsed >= 3 * BALL_INTAKE_TIME && !hw.revolverMotor.isBusy()) {
                     revolverRotate(30);
                     revolverStep = 4;
                 }
@@ -303,15 +259,15 @@ public class FTCAutonomous2026 extends OpMode {
             case INTAKE_2: {
                 double elapsed = getRuntime() - intakeStartTime;
                 if (revolverStep == 0) {
-                    revolverRotate(30);
+                    revolverRotate(120);
                     revolverStep = 1;
-                } else if (revolverStep == 1 && elapsed >= BALL_INTAKE_TIME) {
-                    revolverRotate(60);
+                } else if (revolverStep == 1 && elapsed >= BALL_INTAKE_TIME && !hw.revolverMotor.isBusy()) {
+                    revolverRotate(120);
                     revolverStep = 2;
-                } else if (revolverStep == 2 && elapsed >= 2 * BALL_INTAKE_TIME) {
-                    revolverRotate(60);
+                } else if (revolverStep == 2 && elapsed >= 2 * BALL_INTAKE_TIME && !hw.revolverMotor.isBusy()) {
+                    revolverRotate(120);
                     revolverStep = 3;
-                } else if (revolverStep == 3 && elapsed >= 3 * BALL_INTAKE_TIME) {
+                } else if (revolverStep == 3 && elapsed >= 3 * BALL_INTAKE_TIME && !hw.revolverMotor.isBusy()) {
                     revolverRotate(30);
                     revolverStep = 4;
                 }

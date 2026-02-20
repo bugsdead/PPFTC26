@@ -185,14 +185,14 @@ public class FTCTeleOp2026 extends OpMode{
         lastDpadDownPressed = gamepad1.dpad_down;
 
         if (dpadUpPressed) {
-            added += 0.15;
+            added += 0.1;
         }
         if (dpadDownPressed) {
-            added -= 0.15;
+            added -= 0.1;
         }
     }
     private void geckoControl() {
-        double power = (0.6 + added) * gamepad1.left_trigger;
+        double power = (0.45 + added) * gamepad1.left_trigger;
         hw.lGecko.setPower(power);
         hw.rGecko.setPower(power);
         telemetry.addData("Added: ", added);
@@ -208,7 +208,7 @@ public class FTCTeleOp2026 extends OpMode{
         }
 
         if (intakeOn) {
-            hw.rIntake.setPower(0.5);
+            hw.rIntake.setPower(0.7);
         } else {
             hw.rIntake.setPower(0);
         }
